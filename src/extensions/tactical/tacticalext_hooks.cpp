@@ -33,6 +33,8 @@
 #include "sideext.h"
 #include "syringe.h"
 #include "tactical.h"
+#include "target.h"
+#include "techno.h"
 #include "tacticalext.h"
 #include "tacticalext_init.h"
 #include "technotype.h"
@@ -389,6 +391,67 @@ void TacticalExt::_Select_These(Rect& rect, void (*select_callback)(ObjectClass*
             break;
         }
     }
+}
+
+
+static bool Is_Military_Land_Unit(ObjectClass* obj)
+{
+    if (obj == nullptr || !obj->IsActive || obj->IsInLimbo) {
+        return false;
+    }
+
+    if (obj->RTTI != RTTI_UNIT && obj->RTTI != RTTI_INFANTRY) {
+        return false;
+    }
+
+    HouseClass* house = obj->Owner_HouseClass();
+    if (house == nullptr || !house->Is_Player_Control()) {
+        return false;
+    }
+
+    if (!obj->Class_Of()->IsSelectable) {
+        return false;
+    }
+
+    TechnoClass* techno = Target_As_Techno(obj);
+    if (techno == nullptr) {
+        return false;
+    }
+
+    const TechnoTypeClass* type = techno->Techno_Type_Class();
+    if (type == nullptr) {
+        return false;
+    }
+
+    if (type->Speed == SPEED_FLOAT || type->Speed == SPEED_WINGED) {
+        return false;
+    }
+
+    if (type->Weapons[WEAPON_SLOT_PRIMARY].Weapon == nullptr) {
+        return false;
+    }
+
+    if (Extension::Fetch(techno->TClass)->IsFilterFromBandBoxSelection) {
+        return false;
+    }
+
+    return true;
+}
+
+
+static void Vinifera_Select_View_Callback(ObjectClass* obj)
+{
+    if (Is_Military_Land_Unit(obj)) {
+        obj->Select();
+    }
+}
+
+
+static bool Vinifera_Select_View_Process()
+{
+    reinterpret_cast<TacticalExt*>(TacticalMap)->_Select_These(TacticalRect, Vinifera_Select_View_Callback);
+
+    return true;
 }
 
 
@@ -975,6 +1038,7 @@ void TacticalExtension_Hooks()
     Patch_Jump(0x00614EC0, &TacticalExt::_Clamp_To_Tactical_Rect);
     Patch_Jump(0x00617F80, &TacticalExt::_Save);
     Patch_Jump(0x00479150, &Vinifera_Bandbox_Select);
+    Patch_Jump(0x004E9BD0, &Vinifera_Select_View_Process);
     Patch_Jump(0x00611C60, &TacticalExt::_Draw_Screen_Text);
 
     Patch_Jump(0x006172DB, &_Tactical_Draw_Waypoint_Paths_NormaliseLineAnimation_Patch);

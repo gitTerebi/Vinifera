@@ -40,6 +40,7 @@
 #include "optionsext.h"
 #include "rules.h"
 #include "rulesext.h"
+#include "scrollext_hooks.h"
 #include "sdlsurface.h"
 #include "sessionext.h"
 #include "syringe.h"
@@ -329,6 +330,10 @@ static bool Main_Loop_Intercept()
 
 void Process_Command_If_Allowed(CommandClass* command)
 {
+    if (Vinifera_Is_Smooth_Scroll_Command(command)) {
+        return;
+    }
+
     if (!Scen->InputLock || CommandClass::From_Type(COMMAND_OPTIONS) == command) {
         command->Process();
     }

@@ -10,4 +10,8 @@
 #pragma once
 
 
+class CommandClass;
+
+bool Vinifera_Is_Smooth_Scroll_Command(CommandClass* command);
+
 void ScrollClassExtension_Hooks();

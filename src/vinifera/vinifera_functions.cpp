@@ -42,6 +42,7 @@
 #include "uicontrol.h"
 #include "vinifera_globals.h"
 
+#include <algorithm>
 #include <string>
 
 #include "audio_util.h"
@@ -103,6 +104,7 @@ bool Vinifera_Load_INI()
     }
 
     Vinifera_NoTacticalVersionString = ini.Get_Bool("General", "NoVersionString", Vinifera_NoTacticalVersionString);
+    Vinifera_SmoothKeyboardScroll = ini.Get_Bool("General", "SmoothKeyboardScroll", Vinifera_SmoothKeyboardScroll);
     Vinifera_SavedGamesDirectory = ini.Get_String("General", "SavedGamesDirectory", Vinifera_SavedGamesDirectory);
 
     return true;
