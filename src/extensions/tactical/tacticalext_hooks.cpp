@@ -1048,6 +1048,8 @@ void TacticalExtension_Hooks()
     // Rampastring: Disable drawing of message list class messages
     Patch_Byte(0x00573EAE, 0xEB); // change jz to jmp
 
+    Patch_Byte(0x0058528F, 0xEB);
+
     /**
      *  #issue-351
      * 
