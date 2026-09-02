@@ -27,6 +27,7 @@
 #include "rules.h"
 #include "session.h"
 #include "sessionext.h"
+#include "sharedcontrol.h"
 #include "syringe.h"
 #include "tibsun_functions.h"
 #include "version.h"
@@ -704,7 +705,7 @@ DEFINE_HOOK(0x004946FF, _EventClass_Execute_MEGAMISSION_Prevent_Controlling_Enem
 
     if (Session.Type != GAME_NORMAL) {
         // In multiplayer, each human player can only control one house.
-        if (this_ptr->ID != techno->House->HeapID) {
+        if (this_ptr->ID != techno->House->HeapID && !Vinifera_Event_Sender_Controls(this_ptr->ID, techno)) {
 
             // House IDs between event and unit do not match.
             // This might be a crafted event.
@@ -727,7 +728,7 @@ DEFINE_HOOK(0x004946FF, _EventClass_Execute_MEGAMISSION_Prevent_Controlling_Enem
     else {
         // In campaign, the player can control multiple houses.
         // We might as well also fix this exploit for campaign by checking for player control here.
-        if (!techno->House->IsPlayerControl) {
+        if (!techno->House->IsPlayerControl && !Vinifera_Can_Locally_Control(techno)) {
 
             // Also check for cargo in singleplayer. But use IsPlayerControl instead of direct ID comparison
             // due to the human player being able to control multiple houses.
@@ -775,7 +776,7 @@ DEFINE_HOOK(0x004949AF, _EventClass_Execute_IDLE_Prevent_Controlling_Enemy_Units
 
     if (Session.Type != GAME_NORMAL) {
         // In multiplayer, each human player can only control one house.
-        if (this_ptr->ID != techno->House->HeapID) {
+        if (this_ptr->ID != techno->House->HeapID && !Vinifera_Event_Sender_Controls(this_ptr->ID, techno)) {
             // ID of owner of techno does not match the ID of whoever generated the event.
             // Exit the function.
             return Bail;
@@ -784,7 +785,7 @@ DEFINE_HOOK(0x004949AF, _EventClass_Execute_IDLE_Prevent_Controlling_Enemy_Units
     else {
         // In campaign, the player can control multiple houses.
         // We might as well also fix this exploit for campaign by checking for player control here.
-        if (!techno->House->IsPlayerControl) {
+        if (!techno->House->IsPlayerControl && !Vinifera_Can_Locally_Control(techno)) {
             return Bail;
         }
     }

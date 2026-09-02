@@ -30,6 +30,7 @@
 #include "house.h"
 #include "houseext.h"
 #include "housetype.h"
+#include "sharedcontrol.h"
 #include "infantry.h"
 #include "infantrytype.h"
 #include "infantrytypeext.h"
@@ -913,7 +914,7 @@ FireErrorType TechnoClassExt::_Can_Fire(AbstractClass * target, WeaponSlotType w
  */
 bool TechnoClassExt::_Can_Player_Move() const
 {
-    if (!House->Is_Player_Control())
+    if (!House->Is_Player_Control() && !Vinifera_Can_Locally_Control(this))
         return false;
 
     if (Is_Immobilized())

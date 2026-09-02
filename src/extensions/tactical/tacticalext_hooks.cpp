@@ -33,6 +33,7 @@
 #include "sideext.h"
 #include "syringe.h"
 #include "tactical.h"
+#include "sharedcontrol.h"
 #include "target.h"
 #include "techno.h"
 #include "tacticalext.h"
@@ -405,7 +406,7 @@ static bool Is_Military_Land_Unit(ObjectClass* obj)
     }
 
     HouseClass* house = obj->Owner_HouseClass();
-    if (house == nullptr || !house->Is_Player_Control()) {
+    if (house == nullptr || (!house->Is_Player_Control() && !Vinifera_Is_Shared_Control_House(house))) {
         return false;
     }
 
@@ -468,7 +469,7 @@ static void Vinifera_Bandbox_Select(ObjectClass* obj)
     /**
      *  Don't select objects that we don't own.
      */
-    if (!house || !house->Is_Player_Control())
+    if (!house || (!house->Is_Player_Control() && !Vinifera_Is_Shared_Control_House(house)))
         return;
 
     /**
