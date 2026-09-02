@@ -48,6 +48,7 @@
 #include "scripttype.h"
 #include "session.h"
 #include "sessionext.h"
+#include "sharedcontrol.h"
 #include "sideext.h"
 #include "smudge.h"
 #include "spawner.h"
@@ -1803,6 +1804,7 @@ bool ScenarioClassExtension::Read_Scenario_INI(CCINIClass& ini, bool random)
 
     if (Session.Type != GAME_NORMAL) {
         Init_Forced_Alliances();
+        Vinifera_Init_Shared_Control();
     }
 
     Call_Back();

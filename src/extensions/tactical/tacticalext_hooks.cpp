@@ -405,8 +405,7 @@ static bool Is_Military_Land_Unit(ObjectClass* obj)
         return false;
     }
 
-    HouseClass* house = obj->Owner_HouseClass();
-    if (house == nullptr || (!house->Is_Player_Control() && !Vinifera_Is_Shared_Control_House(house))) {
+    if (obj->Owner_HouseClass() != PlayerPtr) {
         return false;
     }
 
