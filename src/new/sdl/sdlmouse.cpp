@@ -18,6 +18,7 @@
 #include "sdl_functions.h"
 #include "sdlsurface.h"
 #include "shapeset.h"
+#include "vinifera_globals.h"
 
 #include <algorithm>
 
@@ -177,7 +178,7 @@ void SDLMouseClass::Release_Mouse()
         return;
     }
 
-    if (!WindowedMode) {
+    if (!WindowedMode || Vinifera_ClipCursorToWindow) {
         ClipCursor(nullptr);
     }
 
@@ -203,7 +204,7 @@ void SDLMouseClass::Capture_Mouse()
         return;
     }
 
-    if (!WindowedMode) {
+    if (!WindowedMode || Vinifera_ClipCursorToWindow) {
         /**
          *  Compute the client area in screen coordinates and lock cursor inside window.
          */

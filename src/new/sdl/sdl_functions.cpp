@@ -1305,6 +1305,17 @@ LRESULT CALLBACK SDL_Windows_Procedure(HWND hwnd, UINT message, WPARAM wParam, L
             if (GameInFocus) {
                 Focus_Restore();
 
+                if (WindowedMode && Vinifera_ClipCursorToWindow && MouseCursor != nullptr) {
+                    RECT client_rect;
+                    GetClientRect(MainWindow, &client_rect);
+                    POINT ul = {client_rect.left, client_rect.top};
+                    POINT lr = {client_rect.right, client_rect.bottom};
+                    MapWindowPoints(MainWindow, nullptr, &ul, 1);
+                    MapWindowPoints(MainWindow, nullptr, &lr, 1);
+                    RECT clip_rect = {ul.x, ul.y, lr.x, lr.y};
+                    ClipCursor(&clip_rect);
+                }
+
                 /*
                 **  Force all child controls to redraw when regaining focus.
                 */
@@ -1318,6 +1329,10 @@ LRESULT CALLBACK SDL_Windows_Procedure(HWND hwnd, UINT message, WPARAM wParam, L
 
                 RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE | RDW_ALLCHILDREN);
             } else {
+                if (WindowedMode && Vinifera_ClipCursorToWindow) {
+                    ClipCursor(nullptr);
+                }
+
                 Focus_Loss();
             }
         }

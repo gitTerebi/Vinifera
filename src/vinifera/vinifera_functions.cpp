@@ -105,6 +105,7 @@ bool Vinifera_Load_INI()
 
     Vinifera_NoTacticalVersionString = ini.Get_Bool("General", "NoVersionString", Vinifera_NoTacticalVersionString);
     Vinifera_SmoothKeyboardScroll = ini.Get_Bool("General", "SmoothKeyboardScroll", Vinifera_SmoothKeyboardScroll);
+    Vinifera_ClipCursorToWindow = ini.Get_Bool("General", "ClipCursorToWindow", Vinifera_ClipCursorToWindow);
     Vinifera_SavedGamesDirectory = ini.Get_String("General", "SavedGamesDirectory", Vinifera_SavedGamesDirectory);
 
     return true;

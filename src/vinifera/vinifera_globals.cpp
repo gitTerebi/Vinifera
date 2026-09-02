@@ -67,6 +67,8 @@ bool Vinifera_ShowSuperWeaponTimers = true;
 
 bool Vinifera_SmoothKeyboardScroll = true;
 
+bool Vinifera_ClipCursorToWindow = false;
+
 DynamicVectorClass<MFCD *> ViniferaMapsMixes;
 DynamicVectorClass<MFCD*> ViniferaMoviesMixes;
 

@@ -110,6 +110,8 @@ extern bool Vinifera_ShowSuperWeaponTimers;
 
 extern bool Vinifera_SmoothKeyboardScroll;
 
+extern bool Vinifera_ClipCursorToWindow;
+
 extern DynamicVectorClass<MFCD *> ViniferaMapsMixes;
 extern DynamicVectorClass<MFCD *> ViniferaMoviesMixes;
 
