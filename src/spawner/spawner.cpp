@@ -20,6 +20,7 @@
 #include "house.h"
 #include "housetype.h"
 #include "housetypeext.h"
+#include "initext_hooks.h"
 #include "ipxmgr.h"
 #include "language.h"
 #include "latencylevel.h"
@@ -84,108 +85,6 @@ bool Spawner::Init()
     return false;
 }
 
-void Prep_UI_For_Side(SideType side)
-{
-    char name[64];
-
-    DEBUG_INFO("Preparing Mixfiles for Side {}.\n", (int)side);
-
-    // Hack
-    if (side == SIDE_NONE) side = SIDE_GDI;
-
-    /**
-     *  Delete previously loaded mixes.
-     */
-    if (SideCMix) {
-        DEBUG_INFO("     Releasing %s\n", SideCMix->Filename);
-        delete SideCMix;
-        SideCMix = nullptr;
-    }
-
-    if (SideNCMix) {
-        DEBUG_INFO("     Releasing %s\n", SideNCMix->Filename);
-        delete SideNCMix;
-        SideNCMix = nullptr;
-    }
-
-    if (SideCDMix) {
-        DEBUG_INFO("     Releasing %s\n", SideCDMix->Filename);
-        delete SideCDMix;
-        SideCDMix = nullptr;
-    }
-
-    int id = static_cast<int>(side) + 1; // Mix id
-
-    while (ExpandSideMix.Count() > 0) {
-        delete ExpandSideMix[0];
-        ExpandSideMix.Delete(0);
-    }
-
-    /**
-     *  Cached expansion side-specific mixes.
-     */
-    if (Addon_Enabled(ADDON_ANY) == true) {
-        for (int index = 99; index >= 0; index--) {
-            std::snprintf(name, sizeof(name), "E%02dSC%02d.MIX", index, id);
-            if (CCFileClass(name).Is_Available()) {
-                DEBUG_INFO("     Initializing %s\n", name);
-                MFCD* mix = new MFCD(name, &FastKey);
-                ExpandSideMix.Add(mix);
-                mix->Cache();
-            }
-        }
-    }
-
-    /**
-     *  Cached side-specific mix.
-     */
-    std::snprintf(name, sizeof(name), "SIDEC%02d.MIX", id);
-    if (CCFileClass(name).Is_Available()) {
-        DEBUG_INFO("     Initializing %s\n", name);
-        SideCMix = new MFCD(name, &FastKey);
-        SideCMix->Cache();
-    }
-
-    /**
-     *  Not cached expansion side-specific mixes.
-     */
-    if (Addon_Enabled(ADDON_ANY) == true) {
-        for (int index = 99; index >= 0; index--) {
-            std::snprintf(name, sizeof(name), "E%02dSNC%02d.MIX", index, id);
-
-            if (CCFileClass(name).Is_Available()) {
-                DEBUG_INFO("     Initializing %s\n", name);
-                MFCD* mix = new MFCD(name, &FastKey);
-                ExpandSideMix.Add(mix);
-            }
-        }
-    }
-
-    /**
-     *  Not cached side-specific mix.
-     */
-    std::snprintf(name, sizeof(name), "SIDENC%02d.MIX", id);
-    if (CCFileClass(name).Is_Available()) {
-        DEBUG_INFO("     Initializing %s\n", name);
-        SideNCMix = new MFCD(name, &FastKey);
-    }
-
-    /**
-     *  Disk side-specific mix.
-     */
-    if (Session.Type == GAME_NORMAL) {
-        if (Addon_Enabled(ADDON_ANY) == false) {
-            std::snprintf(name, sizeof(name), "SIDECD%02d.MIX", id);
-        } else {
-            std::snprintf(name, sizeof(name), "E%02dSCD%02d.MIX", Get_Required_Addon(), id);
-        }
-        if (CCFileClass(name).Is_Available()) {
-            DEBUG_INFO("     Initializing %s\n", name);
-            SideCDMix = new MFCD(name, &FastKey);
-        }
-    }
-}
-
 /**
  *  Starts the game.
  *
@@ -200,7 +99,12 @@ bool Spawner::Start_Game()
     GameActive = true;
 
     // DTA HACK: Initialize MIX files for the side. They are needed for OwnerDraw graphics.
-    Prep_UI_For_Side((SideType)Config->Players[0].House);
+    SideType side = static_cast<SideType>(Config->Players[0].House);
+    if (side == SIDE_NONE) side = SIDE_GDI;
+    if (!Vinifera_Load_Side_Mixfiles(side)) {
+        DEBUG_ERROR("[Spawner] Start_Game: Failed to load side MIXes!\n");
+        return false;
+    }
 
     /**
      *  Initialize some OD global state so that dialogs work correctly.

@@ -55,12 +55,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "The Vinifera Developers\0"
             VALUE "FileDescription", "Vinifera Engine Extension for Dawn of the Tiberium Age\0"
-            VALUE "FileVersion", "0.1.0.0\0"
+            VALUE "FileVersion", "1.0.0.2\0"
             VALUE "InternalName", "Vinifera\0"
-            VALUE "LegalCopyright", "© 2025 The Vinifera Developers\0"
+            VALUE "LegalCopyright", "© 2026 The Vinifera Developers\0"
             VALUE "OriginalFilename", "VINIFERA.DLL\0"
             VALUE "ProductName", "Vinifera\0"
-            VALUE "ProductVersion", "0.1.0.0 (" VINIFERA_GIT_HASH_SHORT ")\0"
+            VALUE "ProductVersion", "1.0.0.2 (" VINIFERA_GIT_HASH_SHORT ")\0"
             VALUE "SpecialBuild", VER_SPECIALBUILD_STR
             VALUE "PrivateBuild", VINIFERA_GIT_VERSION_STRING
         END
