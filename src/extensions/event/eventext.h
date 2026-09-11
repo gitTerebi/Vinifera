@@ -29,6 +29,7 @@ public:
     EventClassExt(int index, EventType type, RTTIType object, Cell const& cell, ProductionFlags flags);
     EventClassExt(int id, unsigned char max_ahead, LatencyLevelEnum latency_level);
     EventClassExt(int index, EventType type, bool pausedRepairs);
+    EventClassExt(int index, Cell const& cell, int beacon_id, bool clear);
 
     int operator==(const EventClassExt& q) const { return std::memcmp(this, &q, sizeof(q)) == 0; }
     int operator!=(const EventClassExt& q) const { return std::memcmp(this, &q, sizeof(q)) != 0; }
@@ -90,6 +91,12 @@ public:
         struct {
             bool            IsPauseRepairs;
         } PlayerOptions;
+
+        struct {
+            xCell           Where;
+            int             BeaconID;
+            bool            IsClear;
+        } AIRally;
 
         struct ResponseTime2 {
             unsigned char MaxAhead;

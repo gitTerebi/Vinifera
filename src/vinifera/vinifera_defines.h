@@ -287,6 +287,7 @@ enum ExtEventType {
      */
     EXT_EVENT_PLAYER_OPTIONS,
     EXT_EVENT_RESPONSE_TIME2,
+    EXT_EVENT_AI_RALLY,
 
     /**
      *  The new total ExtEventTypes count.

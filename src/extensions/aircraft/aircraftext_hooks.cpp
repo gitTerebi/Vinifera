@@ -12,6 +12,7 @@
 #include "aircraftext_hooks.h"
 
 #include "aircraft.h"
+#include "airally.h"
 #include "aircraftext.h"
 #include "aircraftext_init.h"
 #include "aircrafttype.h"
@@ -59,6 +60,7 @@ public:
     int _Mission_Retreat();
     bool _Enter_Idle_Mode(bool initial, bool a2);
     int _Do_MISSION_GUARD();
+    int _Mission_Guard_Area();
 };
 
 
@@ -1165,6 +1167,34 @@ bool AircraftClassExt::_Enter_Idle_Mode(bool initial, bool a2)
 }
 
 
+int AircraftClassExt::_Mission_Guard_Area()
+{
+    if (Vinifera_AI_Rally_Air_On_Station(this)) {
+
+        if (TarCom != nullptr) {
+            Assign_Mission(MISSION_ATTACK);
+            return 1;
+        }
+
+        return FootClass::Mission_Guard_Area();
+    }
+
+    if (HeightAGL == Class->Flight_Level()) {
+        if (Team == nullptr) {
+            Enter_Idle_Mode();
+        }
+        return 1;
+    }
+
+    if (TarCom != nullptr) {
+        Assign_Mission(MISSION_ATTACK);
+        return 1;
+    }
+
+    return FootClass::Mission_Guard_Area();
+}
+
+
 int AircraftClassExt::_Do_MISSION_GUARD(void)
 {
     assert(IsActive);
@@ -1523,4 +1553,5 @@ void AircraftClassExtension_Hooks()
     Patch_Jump(0x00409910, &AircraftClassExt::_Mission_Retreat);
     Patch_Jump(0x0040B310, &AircraftClassExt::_Enter_Idle_Mode);
     Patch_Jump(0x0040DD10, &AircraftClassExt::_Do_MISSION_GUARD);
+    Patch_Jump(0x0040E0A0, &AircraftClassExt::_Mission_Guard_Area);
 }

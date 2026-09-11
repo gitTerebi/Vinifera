@@ -2,6 +2,7 @@
 
 #include "sharedcontrol.h"
 
+#include "airally.h"
 #include "debughandler.h"
 #include "hooker.h"
 #include "house.h"
@@ -58,6 +59,7 @@ DEFINE_HOOK(0x004CB97E, _HouseClass_Is_Player_Control_Multiplayer, 5)
 void Vinifera_Init_Shared_Control()
 {
     std::fill(std::begin(SharedControlHouses), std::end(SharedControlHouses), false);
+    Vinifera_Reset_AI_Rally();
 
     if (PlayerPtr == nullptr) {
         return;

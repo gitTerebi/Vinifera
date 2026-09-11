@@ -11,6 +11,7 @@
 
 #include "eventext.h"
 
+#include "airally.h"
 #include "debughandler.h"
 #include "extension.h"
 #include "houseext.h"
@@ -65,7 +66,8 @@ unsigned char EventClassExt::EventLength[EXT_EVENT_COUNT] = {
     sizeof(EventClass::Data.General),           // REMOVEPLAYER
     sizeof(EventClass::Data.General),           // LATENCYFUDGE
     sizeof(EventClassExt::Data.PlayerOptions),  // PLAYER_OPTIONS
-    sizeof(EventClassExt::Data.ResponseTime2)   // RESPONSE_TIME2
+    sizeof(EventClassExt::Data.ResponseTime2),  // RESPONSE_TIME2
+    sizeof(EventClassExt::Data.AIRally)         // AI_RALLY
 };
 
 
@@ -108,6 +110,7 @@ char const* EventClassExt::EventNames[EXT_EVENT_COUNT] = {
     "LATENCYFUDGE",
     "PLAYER_OPTIONS",
     "RESPONSE_TIME_2",
+    "AI_RALLY",
 };
 
 
@@ -202,6 +205,23 @@ EventClassExt::EventClassExt(int index, unsigned char max_ahead, LatencyLevelEnu
         ID = -1;
         Type = EVENT_EMPTY;
         Frame = ::Frame + Session.MaxAhead;
+    }
+}
+
+
+EventClassExt::EventClassExt(int index, Cell const& cell, int beacon_id, bool clear)
+{
+    if (index >= 0) {
+        ID = index;
+        Type = static_cast<EventType>(EXT_EVENT_AI_RALLY);
+        Data.AIRally.Where = xCell { cell.X, cell.Y };
+        Data.AIRally.BeaconID = beacon_id;
+        Data.AIRally.IsClear = clear;
+        Frame = ::Frame;
+    } else {
+        ID = -1;
+        Type = EVENT_EMPTY;
+        Frame = ::Frame;
     }
 }
 
@@ -354,6 +374,14 @@ void EventClassExt::Execute()
         */
     case EXT_EVENT_RESPONSE_TIME2:
         ProtocolZero::Handle_Response_Time(*this);
+        break;
+
+    case EXT_EVENT_AI_RALLY:
+        if (Data.AIRally.IsClear) {
+            Vinifera_Clear_AI_Rally();
+        } else {
+            Vinifera_Set_AI_Rally(ID, Cell(Data.AIRally.Where.X, Data.AIRally.Where.Y), Data.AIRally.BeaconID);
+        }
         break;
     }
 }

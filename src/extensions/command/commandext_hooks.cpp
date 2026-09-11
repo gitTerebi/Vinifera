@@ -293,6 +293,7 @@ void Init_Vinifera_Commands()
     Commands.Add(new HealthFilterCommandClass);
     Commands.Add(new HealthFilterAddNextCommandClass);
     Commands.Add(new BeaconPlacementCommandClass);
+    Commands.Add(new AIRallyBeaconCommandClass);
     Commands.Add(new ToggleDebugOverlayCommandClass);
 
 #ifndef NDEBUG

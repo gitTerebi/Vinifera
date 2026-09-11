@@ -15,6 +15,7 @@
 #include "aircrafttype.h"
 #include "anim.h"
 #include "animtype.h"
+#include "airally.h"
 #include "armortype.h"
 #include "asserthandler.h"
 #include "audio_theme.h"
@@ -2324,9 +2325,42 @@ bool BeaconPlacementCommandClass::Process()
 }
 
 
+const char* AIRallyBeaconCommandClass::Get_Name() const
+{
+    return "PlaceAIRallyBeacon";
+}
+
+const char* AIRallyBeaconCommandClass::Get_UI_Name() const
+{
+    return "Place AI Rally Beacon";
+}
+
+const char* AIRallyBeaconCommandClass::Get_Category() const
+{
+    return Text_String(TXT_CONTROL);
+}
+
+const char* AIRallyBeaconCommandClass::Get_Description() const
+{
+    return "Drops a beacon that orders allied AI houses to gather at it and hold position.";
+}
+
+bool AIRallyBeaconCommandClass::Process()
+{
+    if (!BeaconManagerClass::Are_Beacons_Enabled() || PlayerPtr->IsDefeated) {
+        return true;
+    }
+
+    TacticalMapExtension->Beacon_Mode_Control(1);
+    TacticalMapExtension->IsAIRallyBeaconMode = TacticalMapExtension->IsBeaconPlacementMode;
+
+    return true;
+}
+
+
 /**
  *  Grants all available special weapons to the player.
- * 
+ *
  *  @author: CCHyper
  */
 const char *SpecialWeaponsCommandClass::Get_Name() const

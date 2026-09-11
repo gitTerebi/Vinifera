@@ -181,6 +181,8 @@ public:
      */
     bool IsEditingBeaconText;
 
+    bool IsAIRallyBeaconMode;
+
     /**
      *  Currently displayed VOX subtitle (empty when nothing is playing or
      *  the playing VOX has no Text=). Per-session UI state, not serialized.

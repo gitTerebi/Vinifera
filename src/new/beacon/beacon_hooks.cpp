@@ -11,8 +11,10 @@
 
 #include "beacon_hooks.h"
 
+#include "airally.h"
 #include "beacon.h"
 #include "building.h"
+#include "eventext.h"
 #include "extension.h"
 #include "foot.h"
 #include "hooker.h"
@@ -275,11 +277,23 @@ DEFINE_HOOK(0x004795CF, _DisplayClass_Waypoint_Mode_Control_BeaconMode_Patch, 7)
  */
 void Place_Beacon(Cell const& cell, ActionType action)
 {
+    const bool rally = TacticalMapExtension->IsAIRallyBeaconMode;
+
     if (!PlayerPtr->IsDefeated) {
         Coord coord = cell.As_Coord();
         coord.Z = Map[coord].Height * LEVEL_LEPTON_H;
-        BeaconManager.Place_Beacon(PlayerPtr->HeapID, coord, -1, BeaconManagerClass::Beacon_Text(action));
+
+        if (rally && Vinifera_Is_At_AI_Rally(cell)) {
+            OutList.Add(EventClassExt(PlayerPtr->HeapID, cell, -1, true).As_Event());
+        } else if (rally) {
+            const int beacon_id = Frame;
+            BeaconManager.Place_Beacon(PlayerPtr->HeapID, coord, beacon_id, "Rally");
+            OutList.Add(EventClassExt(PlayerPtr->HeapID, cell, beacon_id, false).As_Event());
+        } else {
+            BeaconManager.Place_Beacon(PlayerPtr->HeapID, coord, -1, BeaconManagerClass::Beacon_Text(action));
+        }
     }
+
     TacticalMapExtension->Beacon_Mode_Control(0);
     Map.Set_Default_Mouse(MOUSE_NORMAL, false);
 }

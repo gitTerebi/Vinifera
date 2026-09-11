@@ -71,6 +71,7 @@ TacticalExtension::TacticalExtension(const Tactical* this_ptr) :
     TemplatedTextCache {""},
     IsBeaconPlacementMode(false),
     IsEditingBeaconText(false),
+    IsAIRallyBeaconMode(false),
     SubtitleCategoryCur(SUBTITLE_CATEGORY_SYSTEM),
     SubtitleFont(nullptr),
     SubtitleFontCacheHeight(0),
@@ -1049,6 +1050,7 @@ void TacticalExtension::Beacon_Mode_Control(int control)
             Unselect_All();
         } else {
             IsBeaconPlacementMode = false;
+            IsAIRallyBeaconMode = false;
             Map.Revert_Mouse_Shape();
         }
     }
