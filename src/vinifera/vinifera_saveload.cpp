@@ -72,6 +72,7 @@
 #include "script.h"
 #include "scripttype.h"
 #include "session.h"
+#include "sharedcontrol.h"
 #include "side.h"
 #include "smudgetype.h"
 #include "spawnmanager.h"
@@ -965,6 +966,10 @@ void Vinifera_Post_Load_Game()
     }
 
     BeaconManager.Load_Art();
+
+    if (Session.Type != GAME_NORMAL) {
+        Vinifera_Init_Shared_Control();
+    }
 }
 
 
