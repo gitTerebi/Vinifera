@@ -41,6 +41,8 @@
 #include "technotype.h"
 #include "technotypeext.h"
 #include "tibsun_globals.h"
+#include "unit.h"
+#include "infantry.h"
 #include "uicontrol.h"
 #include "vinifera_globals.h"
 #include "voc.h"
@@ -246,7 +248,8 @@ static bool Should_Exclude_From_Selection(ObjectClass* obj)
     /**
      *  Don't exclude objects that we don't own.
      */
-    if (obj->Owner_HouseClass() != nullptr && !obj->Owner_HouseClass()->IsPlayerControl) {
+    HouseClass* house = obj->Owner_HouseClass();
+    if (house != nullptr && !house->Is_Player_Control() && !Vinifera_Is_Shared_Control_House(house)) {
         return false;
     }
 
@@ -439,17 +442,52 @@ static bool Is_Military_Land_Unit(ObjectClass* obj)
 }
 
 
+static int SelectViewNewlySelected = 0;
+
+
 static void Vinifera_Select_View_Callback(ObjectClass* obj)
 {
-    if (Is_Military_Land_Unit(obj)) {
-        obj->Select();
+    if (Is_Military_Land_Unit(obj) && !obj->IsSelected) {
+        if (obj->Select()) {
+            SelectViewNewlySelected++;
+        }
     }
+}
+
+
+static int Vinifera_Select_View_Whole_Map()
+{
+    int selected = 0;
+
+    for (int i = 0; i < Units.Count(); i++) {
+        if (Is_Military_Land_Unit(Units[i]) && !Units[i]->IsSelected) {
+            if (Units[i]->Select()) {
+                selected++;
+            }
+        }
+    }
+
+    for (int i = 0; i < Infantry.Count(); i++) {
+        if (Is_Military_Land_Unit(Infantry[i]) && !Infantry[i]->IsSelected) {
+            if (Infantry[i]->Select()) {
+                selected++;
+            }
+        }
+    }
+
+    return selected;
 }
 
 
 static bool Vinifera_Select_View_Process()
 {
+    SelectViewNewlySelected = 0;
+
     reinterpret_cast<TacticalExt*>(TacticalMap)->_Select_These(TacticalRect, Vinifera_Select_View_Callback);
+
+    if (SelectViewNewlySelected == 0) {
+        Vinifera_Select_View_Whole_Map();
+    }
 
     return true;
 }
