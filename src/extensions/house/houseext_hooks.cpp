@@ -41,7 +41,6 @@
 #include "scenarioext.h"
 #include "session.h"
 #include "sessionext.h"
-#include "sharedcontrol.h"
 #include "sideext.h"
 #include "spawner.h"
 #include "super.h"
@@ -65,12 +64,6 @@
 #include "vinifera_util.h"
 #include "vox.h"
 #include "weapontype.h"
-
-
-static bool Is_Computer_Allied_To_Human(HouseClass *house)
-{
-    return house != nullptr && !house->Is_Human_Player() && Vinifera_Is_Shared_Control_House(house);
-}
 
 
 bool AdvAI_House_Search_For_Next_Expansion_Point(HouseClass* house)
@@ -1020,10 +1013,6 @@ void AdvAI_Raise_Money(HouseClass* house)
  */
 void AdvAI_Economy_Upkeep(HouseClass* house)
 {
-    if (Is_Computer_Allied_To_Human(house)) {
-        return;
-    }
-
     AdvAI_Raise_Money(house);
 
     // Don't sell refineries on Easy mode.
@@ -2889,9 +2878,7 @@ int HouseClassExt::_Expert_AI()
      *  broke mode.
      */
     if (State == STATE_ENDGAME) {
-        if (!Is_Computer_Allied_To_Human(this)) {
-            Fire_Sale();
-        }
+        Fire_Sale();
         All_To_Hunt();
     } else {
         if (State == STATE_BUILDUP) {
@@ -2924,7 +2911,7 @@ int HouseClassExt::_Expert_AI()
 
             switch (strat) {
             case STRATEGY_FIRE_SALE:
-                urgency[strat] = Is_Computer_Allied_To_Human(this) ? URGENCY_NONE : Check_Fire_Sale();
+                urgency[strat] = Check_Fire_Sale();
                 break;
 
             case STRATEGY_RAISE_MONEY:
@@ -3199,11 +3186,6 @@ UrgencyType HouseClassExt::_Check_Raise_Money()
  */
 void HouseClassExt::_MPlayer_Defeated()
 {
-    if (Is_Computer_Allied_To_Human(this) && ConstructionYards.Count() == 0) {
-        DEBUG_INFO("MPlayer_Defeated() - Ignoring no-ConYard defeat for shared-control ally {}\n", IniName);
-        return;
-    }
-
     char txt[80];
 
     /**
@@ -3502,10 +3484,6 @@ void HouseClassExt::_Make_Ally(HouseClass* house)
 DEFINE_HOOK(0x004BCEE7, _HouseClass_AI_Short_Game_BaseUnit_Patch, 0)
 {
     GET(HouseClass *, this_ptr, ESI);
-
-    if (Is_Computer_Allied_To_Human(this_ptr)) {
-        return 0x004BCF6E;
-    }
 
     /**
      *  Count all MCVs we own to see if the player should explode.
