@@ -66,6 +66,31 @@
 
 
 /**
+ *  Scripted house transfers use Captured(), whose multiplayer AI branch sells
+ *  every acquired building except the first construction yard. Keep bases
+ *  granted to human players' AI allies, independently of shared control.
+ */
+DEFINE_HOOK(0x0042FD7F, _BuildingClass_Captured_Keep_AI_Ally_Buildings, 6)
+{
+    GET(BuildingClass*, building, ESI);
+    HouseClass* owner = building->House;
+
+    if (Session.Type != GAME_NORMAL && !owner->IsHuman) {
+        // Use all human houses so every multiplayer peer makes the same decision.
+        for (int i = 0; i < Houses.Count(); i++) {
+            HouseClass* human = Houses[i];
+            if (human != nullptr && human->IsHuman && !human->IsDefeated &&
+                owner->Is_Ally(human) && human->Is_Ally(owner)) {
+                return 0x0042FE18;
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+/**
  *  A fake class for implementing new member functions which allow
  *  access to the "this" pointer of the intended class.
  *
