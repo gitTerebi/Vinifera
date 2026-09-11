@@ -11,6 +11,8 @@
 
 #include "optionsext.h"
 
+#include "audio_defines.h"
+#include "audio_manager.h"
 #include "ccini.h"
 #include "debughandler.h"
 #include "noinit.h"
@@ -19,6 +21,8 @@
 #include "tibsun_globals.h"
 #include "uicontrol.h"
 #include "vinifera_globals.h"
+
+#include <algorithm>
 
 
 namespace
@@ -158,7 +162,8 @@ OptionsClassExtension::OptionsClassExtension(const OptionsClass *this_ptr) :
     AutoSaveCount(5),
     AutoSaveInterval(7200),
     IsAutoSaveInSkirmish(false),
-    IsClassicMessagePosition(false)
+    IsClassicMessagePosition(false),
+    MovieVolume(1.0f)
 {
 }
 
@@ -272,7 +277,10 @@ void OptionsClassExtension::Load_Settings()
     AutoSaveInterval = ConfigINI.Get_Int("Options", "AutoSaveInterval", AutoSaveInterval);
     IsAutoSaveInSkirmish = ConfigINI.Get_Bool("Options", "AutoSaveInSkirmish", IsAutoSaveInSkirmish);
     IsClassicMessagePosition = ConfigINI.Get_Bool("Options", "ClassicMessageListPosition", IsClassicMessagePosition);
-    
+
+    MovieVolume = std::clamp<float>(ConfigINI.Get_Float("Audio", "MovieVolume", MovieVolume), AUDIO_VOLUME_MIN, AUDIO_VOLUME_MAX);
+    Apply_Movie_Volume();
+
     /**
      *  Read keys from Keyboard.ini.
      *
@@ -378,6 +386,12 @@ void OptionsClassExtension::Save_Settings()
  */
 void OptionsClassExtension::Set()
 {
+}
+
+
+void OptionsClassExtension::Apply_Movie_Volume() const
+{
+    AudioManager.Set_Group_Volume(AUDIO_GROUP_STREAMING, MovieVolume);
 }
 
 

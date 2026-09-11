@@ -60,6 +60,7 @@ public:
     void Save_Settings();
 
     void Set();
+    void Apply_Movie_Volume() const;
     SidebarViewType Get_Sidebar_View_Type() const;
 
     static RendererDriverType Parse_Renderer_Driver(const char* name);
@@ -147,4 +148,6 @@ public:
      *  Are messages drawn top-left rather than bottom-left?
      */
     bool IsClassicMessagePosition;
+
+    float MovieVolume;
 };

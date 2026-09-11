@@ -1583,6 +1583,16 @@ SOMESIDE=          ; filename, side-specific audio file for the side named SOMES
 | `IMPORTANT` | Drains before `NORMAL` within the same queue. |
 | `CRITICAL` | Drains first within its queue. |
 
+### Movie Volume
+
+Movie audio has its own volume setting instead of following the sound effect volume. It is read from `SUN.INI` and accepts a value between `0.0` and `1.0`.
+
+In `SUN.INI`:
+```ini
+[Audio]
+MovieVolume=1.0  ; float, playback volume of movie audio. Defaults to 1.0.
+```
+
 ### Subtitles
 
 `EVA.INI` speech entries can display subtitles using their `Text=` value. Subtitle filtering is controlled by `SUN.INI`.

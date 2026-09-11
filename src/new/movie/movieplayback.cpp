@@ -16,10 +16,12 @@
 #include "audio_streaming.h"
 #include "ccfile.h"
 #include "debughandler.h"
+#include "extension_globals.h"
 #include "iomap.h"
 #include "movie.h"
 #include "moviebackend_mediafoundation.h"
 #include "movieskip.h"
+#include "optionsext.h"
 #include "playmovie.h"
 #include "sdl_functions.h"
 #include "sdl_movie.h"
@@ -204,6 +206,10 @@ struct MoviePlayer
         if (!stream->Open("MOVIE_AUDIO_STREAM", chunk.SampleRate, chunk.Channels, bps, true)) {
             DEBUG_ERROR("Failed to open movie audio stream.\n");
             return false;
+        }
+
+        if (OptionsExtension != nullptr) {
+            OptionsExtension->Apply_Movie_Volume();
         }
 
         stream->Play();

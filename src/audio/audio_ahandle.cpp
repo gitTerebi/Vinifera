@@ -16,7 +16,9 @@
 #include "audio_manager.h"
 #include "audio_streaming.h"
 #include "debughandler.h"
+#include "extension_globals.h"
 #include "gametime.h"
+#include "optionsext.h"
 #include "vinifera_thread.h"
 
 #include <mutex>
@@ -268,6 +270,10 @@ long __cdecl AudioHandleClass::Open_Audio_Handler(VQAHandleP *vqap, AhandleInitP
     if (!StreamInstance->Open(std::string("VQA_AUDIO_STREAM"), SampleRate, Channels, BitsPerSample, true)) {
         DEBUG_ERROR("AudioHandle: Failed to open VQ audio handler!\n");
         return VQAERR_AUDIO;
+    }
+
+    if (OptionsExtension != nullptr) {
+        OptionsExtension->Apply_Movie_Volume();
     }
 
     AudioHandleThreadExit.store(false, std::memory_order_relaxed);
