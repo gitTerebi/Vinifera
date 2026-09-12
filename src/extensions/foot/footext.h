@@ -42,4 +42,9 @@ class FootClassExtension : public TechnoClassExtension
         Cell LastFlightCell;
 
         int WFStuckFrame;
+
+        bool IsAttackMove;
+        Cell AttackMoveCell;
+        int AttackMoveStatus;
+        int AttackMoveScanDelay;
 };

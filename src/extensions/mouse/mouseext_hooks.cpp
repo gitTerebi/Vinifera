@@ -12,8 +12,11 @@
 #include "mouseext_hooks.h"
 
 #include "asserthandler.h"
+#include "attackmove.h"
 #include "cell.h"
 #include "extension.h"
+#include "extension_globals.h"
+#include "tacticalext.h"
 #include "hooker.h"
 #include "mouse.h"
 #include "mousetype.h"
@@ -298,6 +301,13 @@ static ActionType Get_Action(ObjectClass* obj, Cell& cellnum, bool check_fog)
 {
     ActionType action;
     TechnoClass* selected = Best_Selected_Object();
+
+    if (TacticalMapExtension->IsAttackMoveMode
+        && !Map.PendingObject
+        && Map.TargettingType == SUPER_NONE
+        && !Map.IsSellMode && !Map.IsPowerMode && !Map.IsRepairMode && !Map.IsWaypointMode) {
+        return Vinifera_AttackMove_Action();
+    }
 
     if (obj) {
         action = selected->What_Action(obj, false);

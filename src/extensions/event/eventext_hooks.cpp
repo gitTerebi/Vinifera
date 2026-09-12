@@ -11,6 +11,7 @@
 
 #include "eventext_hooks.h"
 
+#include "attackmove.h"
 #include "connmgr.h"
 #include "debughandler.h"
 #include "desyncdialog.h"
@@ -747,6 +748,8 @@ DEFINE_HOOK(0x004946FF, _EventClass_Execute_MEGAMISSION_Prevent_Controlling_Enem
         }
     }
 
+    Vinifera_AttackMove_Clear(techno);
+
     // Continue event execution.
     return Continue;
 }
@@ -789,6 +792,8 @@ DEFINE_HOOK(0x004949AF, _EventClass_Execute_IDLE_Prevent_Controlling_Enemy_Units
             return Bail;
         }
     }
+
+    Vinifera_AttackMove_Clear(techno);
 
     // Continue event execution.
     // Set esi to point to the techno and edi to zero, the original

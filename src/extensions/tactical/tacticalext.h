@@ -71,6 +71,7 @@ public:
     void Flag_Cell(CellClass& cell);
 
     void Beacon_Mode_Control(int control);
+    void Attack_Move_Mode_Control(int control);
     void Draw_Beacon_Text(std::string const& text, ColorScheme& scheme, Point2D const& drawpoint, Rect const& cliprect, bool centered, int offset);
 
     /**
@@ -182,6 +183,8 @@ public:
     bool IsEditingBeaconText;
 
     bool IsAIRallyBeaconMode;
+
+    bool IsAttackMoveMode;
 
     /**
      *  Currently displayed VOX subtitle (empty when nothing is playing or

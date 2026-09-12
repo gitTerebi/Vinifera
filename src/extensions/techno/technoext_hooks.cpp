@@ -14,6 +14,7 @@
 #include "aircraft.h"
 #include "aircraftext.h"
 #include "asserthandler.h"
+#include "attackmove.h"
 #include "audio_vox.h"
 #include "buildingext.h"
 #include "buildingtypeext.h"
@@ -106,6 +107,7 @@ public:
     int _How_Many_Survivors() const;
     bool _Spawner_Fire_At(AbstractClass * target, WeaponTypeClass* weapon);
     bool _Target_Something_Nearby(Coord& coord, ThreatType threat);
+    int  _Threat_Range(int control) const;
     void _Stun();
     void _Mission_AI();
     FireErrorType _Can_Fire(AbstractClass * target, WeaponSlotType which = WEAPON_SLOT_PRIMARY);
@@ -544,6 +546,45 @@ bool TechnoClassExt::_Spawner_Fire_At(AbstractClass * target, WeaponTypeClass* w
     }
 
     return false;
+}
+
+
+int TechnoClassExt::_Threat_Range(int control) const
+{
+    if (control == -1) {
+        return -1;
+    }
+
+    if (control == 0) {
+
+        // Travelling scans past weapon range so Approach_Target still computes a firing cell (foot.cpp:1144).
+        if (Is_Foot() && Vinifera_AttackMove_Is_Active(reinterpret_cast<const FootClass*>(this))) {
+            if (Vinifera_AttackMove_Is_Travelling(reinterpret_cast<const FootClass*>(this))) {
+                return std::max(Weapon_Range(WEAPON_SLOT_PRIMARY), Weapon_Range(WEAPON_SLOT_SECONDARY))
+                    + ATTACKMOVE_LOOKAHEAD_LEPTONS;
+            }
+            return 0;
+        }
+
+        if (TClass->ThreatRange != 0 && !Is_Renovator()) {
+            return TClass->ThreatRange;
+        }
+        return 0;
+    }
+
+    int range = TClass->ThreatRange;
+    if (range == 0) {
+        range = std::max(Weapon_Range(WEAPON_SLOT_PRIMARY), Weapon_Range(WEAPON_SLOT_SECONDARY));
+    }
+
+    range *= 2;
+    if (control == 2) {
+        range = std::clamp(range, 7 * CELL_LEPTON, 16 * CELL_LEPTON);
+    } else {
+        range = std::clamp(range, 0, 16 * CELL_LEPTON);
+    }
+
+    return range;
 }
 
 
@@ -3901,6 +3942,7 @@ void TechnoClassExtension_Hooks()
     Patch_Jump(0x006364A0, &TechnoClassExt::_Crew_Type);
     Patch_Jump(0x0062A300, &TechnoClassExt::_How_Many_Survivors);
     Patch_Jump(0x00637450, &TechnoClassExt::_Target_Something_Nearby);
+    Patch_Jump(0x006365B0, &TechnoClassExt::_Threat_Range);
     Patch_Jump(0x0062FD20, &TechnoClassExt::_Stun);
     Patch_Call(0x0062E9D1, &TechnoClassExt::_Mission_AI);
     Patch_Jump(0x0062F980, &TechnoClassExt::_Can_Fire);

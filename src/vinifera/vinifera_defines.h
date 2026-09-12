@@ -288,6 +288,7 @@ enum ExtEventType {
     EXT_EVENT_PLAYER_OPTIONS,
     EXT_EVENT_RESPONSE_TIME2,
     EXT_EVENT_AI_RALLY,
+    EXT_EVENT_ATTACK_MOVE,
 
     /**
      *  The new total ExtEventTypes count.
@@ -320,6 +321,7 @@ enum ExtActionType {
     EXT_ACTION_PLACE_BEACON_6,
     EXT_ACTION_PLACE_BEACON_7,
     EXT_ACTION_SELECT_BEACON,
+    EXT_ACTION_ATTACK_MOVE,
 
     /**
      *  The new total ExtEventTypes count.

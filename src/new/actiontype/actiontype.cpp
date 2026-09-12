@@ -84,7 +84,8 @@ static const char* ActionNames[EXT_ACTION_COUNT] = {
     "PlaceBeacon5",             // EXT_ACTION_PLACE_BEACON_5
     "PlaceBeacon6",             // EXT_ACTION_PLACE_BEACON_6
     "PlaceBeacon7",             // EXT_ACTION_PLACE_BEACON_7
-    "SelectBeacon"              // EXT_ACTION_SELECT_BEACON
+    "SelectBeacon",             // EXT_ACTION_SELECT_BEACON
+    "AttackMove"                // EXT_ACTION_ATTACK_MOVE
 };
 
 
@@ -160,7 +161,8 @@ static ActionControlType ActionControl[EXT_ACTION_COUNT] = {
     ActionControlType {ActionNames[EXT_ACTION_PLACE_BEACON_5],      MOUSE_PLACE_WAYPOINT,       MOUSE_PLACE_WAYPOINT},      // EXT_ACTION_PLACE_BEACON_6
     ActionControlType {ActionNames[EXT_ACTION_PLACE_BEACON_6],      MOUSE_PLACE_WAYPOINT,       MOUSE_PLACE_WAYPOINT},      // EXT_ACTION_PLACE_BEACON_7
     ActionControlType {ActionNames[EXT_ACTION_PLACE_BEACON_7],      MOUSE_PLACE_WAYPOINT,       MOUSE_PLACE_WAYPOINT},      // EXT_ACTION_PLACE_BEACON_8
-    ActionControlType {ActionNames[EXT_ACTION_SELECT_BEACON],       MOUSE_SELECT_WAYPOINT,      MOUSE_SELECT_WAYPOINT}      // EXT_ACTION_SELECT_BEACON
+    ActionControlType {ActionNames[EXT_ACTION_SELECT_BEACON],       MOUSE_SELECT_WAYPOINT,      MOUSE_SELECT_WAYPOINT},     // EXT_ACTION_SELECT_BEACON
+    ActionControlType {ActionNames[EXT_ACTION_ATTACK_MOVE],         MOUSE_CAN_ATTACK,           MOUSE_CAN_ATTACK}           // EXT_ACTION_ATTACK_MOVE
 };
 
 

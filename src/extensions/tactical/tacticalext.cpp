@@ -70,6 +70,7 @@ TacticalExtension::TacticalExtension(const Tactical* this_ptr) :
     IsTemplatedTextCached(false),
     TemplatedTextCache {""},
     IsBeaconPlacementMode(false),
+    IsAttackMoveMode(false),
     IsEditingBeaconText(false),
     IsAIRallyBeaconMode(false),
     SubtitleCategoryCur(SUBTITLE_CATEGORY_SYSTEM),
@@ -1047,12 +1048,49 @@ void TacticalExtension::Beacon_Mode_Control(int control)
         Map.Set_Default_Mouse(MOUSE_NORMAL, false);
         if (mode) {
             IsBeaconPlacementMode = true;
+            IsAttackMoveMode = false;
             Unselect_All();
         } else {
             IsBeaconPlacementMode = false;
             IsAIRallyBeaconMode = false;
             Map.Revert_Mouse_Shape();
         }
+    }
+}
+
+
+void TacticalExtension::Attack_Move_Mode_Control(int control)
+{
+    bool mode = IsAttackMoveMode;
+    switch (control) {
+    case 0:
+        mode = false;
+        break;
+
+    case -1:
+        mode = (IsAttackMoveMode == false);
+        break;
+
+    case 1:
+        mode = true;
+        break;
+    }
+
+    if (mode == IsAttackMoveMode || Map.PendingObject) {
+        return;
+    }
+
+    if (mode) {
+        Map.IsSellMode = false;
+        Map.IsPowerMode = false;
+        Map.IsWaypointMode = false;
+        Map.IsRepairMode = false;
+        IsBeaconPlacementMode = false;
+        IsAIRallyBeaconMode = false;
+        IsAttackMoveMode = true;
+    } else {
+        IsAttackMoveMode = false;
+        Map.Revert_Mouse_Shape();
     }
 }
 

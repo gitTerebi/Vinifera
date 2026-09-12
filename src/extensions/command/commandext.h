@@ -704,6 +704,17 @@ public:
 };
 
 
+class AttackMoveCommandClass : public ViniferaCommandClass
+{
+public:
+    virtual const char* Get_Name() const override;
+    virtual const char* Get_UI_Name() const override;
+    virtual const char* Get_Category() const override;
+    virtual const char* Get_Description() const override;
+    virtual bool Process() override;
+};
+
+
 /**
  *  Grants all available special weapons to the player.
  */

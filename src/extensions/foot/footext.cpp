@@ -19,6 +19,10 @@
  */
 FootClassExtension::FootClassExtension(const FootClass *this_ptr) :
     WFStuckFrame(0),
+    IsAttackMove(false),
+    AttackMoveCell(0, 0),
+    AttackMoveStatus(0),
+    AttackMoveScanDelay(0),
     TechnoClassExtension(this_ptr)
 {
 }
@@ -87,6 +91,13 @@ HRESULT FootClassExtension::Save(IStream *pStm, BOOL fClearDirty)
 void FootClassExtension::Object_CRC(CRCEngine &crc) const
 {
     TechnoClassExtension::Object_CRC(crc);
+
+    if (IsAttackMove) {
+        crc(AttackMoveCell.X);
+        crc(AttackMoveCell.Y);
+        crc(AttackMoveStatus);
+        crc(AttackMoveScanDelay);
+    }
 }
 
 

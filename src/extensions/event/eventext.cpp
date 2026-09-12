@@ -12,6 +12,7 @@
 #include "eventext.h"
 
 #include "airally.h"
+#include "attackmove.h"
 #include "debughandler.h"
 #include "extension.h"
 #include "houseext.h"
@@ -67,7 +68,8 @@ unsigned char EventClassExt::EventLength[EXT_EVENT_COUNT] = {
     sizeof(EventClass::Data.General),           // LATENCYFUDGE
     sizeof(EventClassExt::Data.PlayerOptions),  // PLAYER_OPTIONS
     sizeof(EventClassExt::Data.ResponseTime2),  // RESPONSE_TIME2
-    sizeof(EventClassExt::Data.AIRally)         // AI_RALLY
+    sizeof(EventClassExt::Data.AIRally),        // AI_RALLY
+    sizeof(EventClassExt::Data.AttackMove)      // ATTACK_MOVE
 };
 
 
@@ -111,6 +113,7 @@ char const* EventClassExt::EventNames[EXT_EVENT_COUNT] = {
     "PLAYER_OPTIONS",
     "RESPONSE_TIME_2",
     "AI_RALLY",
+    "ATTACK_MOVE",
 };
 
 
@@ -217,6 +220,22 @@ EventClassExt::EventClassExt(int index, Cell const& cell, int beacon_id, bool cl
         Data.AIRally.Where = xCell { cell.X, cell.Y };
         Data.AIRally.BeaconID = beacon_id;
         Data.AIRally.IsClear = clear;
+        Frame = ::Frame;
+    } else {
+        ID = -1;
+        Type = EVENT_EMPTY;
+        Frame = ::Frame;
+    }
+}
+
+
+EventClassExt::EventClassExt(int index, TargetClass const& whom, Cell const& cell)
+{
+    if (index >= 0) {
+        ID = index;
+        Type = static_cast<EventType>(EXT_EVENT_ATTACK_MOVE);
+        Data.AttackMove.Whom = whom;
+        Data.AttackMove.Where = xCell { cell.X, cell.Y };
         Frame = ::Frame;
     } else {
         ID = -1;
@@ -382,6 +401,10 @@ void EventClassExt::Execute()
         } else {
             Vinifera_Set_AI_Rally(ID, Cell(Data.AIRally.Where.X, Data.AIRally.Where.Y), Data.AIRally.BeaconID);
         }
+        break;
+
+    case EXT_EVENT_ATTACK_MOVE:
+        Vinifera_AttackMove_Assign(ID, Data.AttackMove.Whom, Cell(Data.AttackMove.Where.X, Data.AttackMove.Where.Y));
         break;
     }
 }

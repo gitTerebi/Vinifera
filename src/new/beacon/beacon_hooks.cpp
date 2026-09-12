@@ -12,6 +12,7 @@
 #include "beacon_hooks.h"
 
 #include "airally.h"
+#include "attackmove.h"
 #include "beacon.h"
 #include "building.h"
 #include "eventext.h"
@@ -121,6 +122,7 @@ void DisplayClassExt::_Sell_Mode_Control(int control)
         IsPowerMode = false;
         IsWaypointMode = false;
         TacticalMapExtension->IsBeaconPlacementMode = false;
+        TacticalMapExtension->IsAttackMoveMode = false;
         if (mode && PlayerPtr->CurBuildings > 0) {
             IsSellMode = true;
             Unselect_All();
@@ -161,6 +163,7 @@ void DisplayClassExt::_Power_Mode_Control(int control)
         IsSellMode = false;
         IsWaypointMode = false;
         TacticalMapExtension->IsBeaconPlacementMode = false;
+        TacticalMapExtension->IsAttackMoveMode = false;
         if (mode && PlayerPtr->CurBuildings > 0) {
             IsPowerMode = true;
             Unselect_All();
@@ -200,6 +203,7 @@ void DisplayClassExt::_Repair_Mode_Control(int control)
         IsPowerMode = false;
         IsWaypointMode = false;
         TacticalMapExtension->IsBeaconPlacementMode = false;
+        TacticalMapExtension->IsAttackMoveMode = false;
         Set_Default_Mouse(MOUSE_NORMAL, false);
         if (mode && PlayerPtr->CurBuildings > 0) {
             IsRepairMode = true;
@@ -225,6 +229,8 @@ void DisplayClassExt::_Mouse_Right_Release(Point2D const& point)
         PendingObject = nullptr;
         PendingHouse = HOUSE_NONE;
         Set_Cursor_Shape(nullptr);
+    } else if (TacticalMapExtension->IsAttackMoveMode) {
+        TacticalMapExtension->Attack_Move_Mode_Control(0);
     } else {
         if (IsRepairMode) {
             Repair_Mode_Control(0);
@@ -265,6 +271,7 @@ void DisplayClassExt::_Mouse_Right_Release(Point2D const& point)
 DEFINE_HOOK(0x004795CF, _DisplayClass_Waypoint_Mode_Control_BeaconMode_Patch, 7)
 {
     TacticalMapExtension->IsBeaconPlacementMode = false;
+    TacticalMapExtension->IsAttackMoveMode = false;
 
     return 0;
 }
@@ -310,7 +317,12 @@ DEFINE_HOOK(0x00478C6D, _DisplayClass_Mouse_Left_Release_Beacon_Patch, 0)
     GET(ActionType, action, EDI);
     GET(Cell const*, cell, EBP);
 
-    if (BeaconManagerClass::Is_Beacon_Placement_Action(action)) {
+    if (Vinifera_AttackMove_Is_Action(action)) {
+        Vinifera_AttackMove_Order(*cell);
+        TacticalMapExtension->Attack_Move_Mode_Control(0);
+        Map.Set_Default_Mouse(MOUSE_NORMAL, false);
+        return 0x004790D1;
+    } if (BeaconManagerClass::Is_Beacon_Placement_Action(action)) {
         Place_Beacon(*cell, action);
         return 0x004790D1;
     } if (action == EXT_ACTION_SELECT_BEACON) {
@@ -359,6 +371,11 @@ DEFINE_HOOK(0x005E8A1B, _ScrollClass_What_Action_Select_Beacon_Patch, 0)
  */
 DEFINE_HOOK(0x005E8C41, _ScrollClass_What_Action_Place_Beacon_Patch, 0)
 {
+    if (TacticalMapExtension->IsAttackMoveMode) {
+        R->EBP(Vinifera_AttackMove_Action());
+        return 0x005E8D7F;
+    }
+
     if (TacticalMapExtension->IsBeaconPlacementMode) {
         ActionType action = BeaconManagerClass::Pick_Beacon_Placement_Action();
         R->EBP(action);

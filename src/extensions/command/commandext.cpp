@@ -16,6 +16,7 @@
 #include "anim.h"
 #include "animtype.h"
 #include "airally.h"
+#include "attackmove.h"
 #include "armortype.h"
 #include "asserthandler.h"
 #include "audio_theme.h"
@@ -2353,6 +2354,38 @@ bool AIRallyBeaconCommandClass::Process()
 
     TacticalMapExtension->Beacon_Mode_Control(1);
     TacticalMapExtension->IsAIRallyBeaconMode = TacticalMapExtension->IsBeaconPlacementMode;
+
+    return true;
+}
+
+
+const char* AttackMoveCommandClass::Get_Name() const
+{
+    return "AttackMove";
+}
+
+const char* AttackMoveCommandClass::Get_UI_Name() const
+{
+    return "Attack Move";
+}
+
+const char* AttackMoveCommandClass::Get_Category() const
+{
+    return Text_String(TXT_CONTROL);
+}
+
+const char* AttackMoveCommandClass::Get_Description() const
+{
+    return "Press, then click a destination. Selected units travel there and stop to engage any enemy they meet on the way.";
+}
+
+bool AttackMoveCommandClass::Process()
+{
+    if (PlayerPtr->IsDefeated || !Vinifera_AttackMove_Has_Selection()) {
+        return true;
+    }
+
+    TacticalMapExtension->Attack_Move_Mode_Control(-1);
 
     return true;
 }

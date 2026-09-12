@@ -13,6 +13,7 @@
 
 #include "aircrafttracker.h"
 #include "asserthandler.h"
+#include "attackmove.h"
 #include "clipline.h"
 #include "coord.h"
 #include "debughandler.h"
@@ -329,10 +330,15 @@ void FootClassExt::_Draw_Action_Line() const
         UIControls->TargetLineDropShadowColor.G,
         UIControls->TargetLineDropShadowColor.B);
 
-    const unsigned navcom_color = DSurface::Build_Hicolor_Pixel(
-        UIControls->MovementLineColor.R,
-        UIControls->MovementLineColor.G,
-        UIControls->MovementLineColor.B);
+    // OpenRA AttackMoveInfo.TargetLineColor is Color.OrangeRed.
+    const bool attack_moving = Vinifera_AttackMove_Is_Active(this);
+
+    const unsigned navcom_color = attack_moving
+        ? DSurface::Build_Hicolor_Pixel(255, 69, 0)
+        : DSurface::Build_Hicolor_Pixel(
+            UIControls->MovementLineColor.R,
+            UIControls->MovementLineColor.G,
+            UIControls->MovementLineColor.B);
 
     const unsigned navcom_drop_color = DSurface::Build_Hicolor_Pixel(
         UIControls->MovementLineDropShadowColor.R,
@@ -354,12 +360,22 @@ void FootClassExt::_Draw_Action_Line() const
 
     }
 
-    if (NavCom) {
+    Cell attack_move_cell;
+    const bool show_attack_move_dest = !NavCom && attack_moving
+        && Vinifera_AttackMove_Destination(this, attack_move_cell);
+
+    if (NavCom || show_attack_move_dest) {
 
         start_coord = PositionCoord;
 
-        AbstractClass * navtarget = field_260.Count() ? field_260.Fetch_Tail() : NavCom;
-        end_coord = navtarget->Center_Coord();
+        if (show_attack_move_dest) {
+            end_coord = attack_move_cell.As_Coord();
+            end_coord.Z = Map.Get_Height_GL(end_coord);
+        } else {
+            AbstractClass * navtarget = field_260.Count() ? field_260.Fetch_Tail() : NavCom;
+            end_coord = navtarget->Center_Coord();
+        }
+
         Cell target_cell = end_coord.As_Cell();
 
         if (Map.In_Radar(target_cell) && Map[end_coord].IsUnderBridge) {
@@ -1180,6 +1196,8 @@ DEFINE_HOOK(0x004A58A8, _FootClass_AI_Hook, 0)
     GET(FootClass*, this_ptr, ESI);
 
     FootClass_AI_Abandon_Invalid_Targets(this_ptr);
+
+    Vinifera_AttackMove_AI(this_ptr);
 
     // FootClass_AI_Stuck_In_WarFactory_Check(this_ptr);
 

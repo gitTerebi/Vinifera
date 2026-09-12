@@ -30,6 +30,7 @@ public:
     EventClassExt(int id, unsigned char max_ahead, LatencyLevelEnum latency_level);
     EventClassExt(int index, EventType type, bool pausedRepairs);
     EventClassExt(int index, Cell const& cell, int beacon_id, bool clear);
+    EventClassExt(int index, TargetClass const& whom, Cell const& cell);
 
     int operator==(const EventClassExt& q) const { return std::memcmp(this, &q, sizeof(q)) == 0; }
     int operator!=(const EventClassExt& q) const { return std::memcmp(this, &q, sizeof(q)) != 0; }
@@ -97,6 +98,11 @@ public:
             int             BeaconID;
             bool            IsClear;
         } AIRally;
+
+        struct {
+            xTargetClass    Whom;
+            xCell           Where;
+        } AttackMove;
 
         struct ResponseTime2 {
             unsigned char MaxAhead;
