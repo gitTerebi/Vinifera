@@ -557,13 +557,19 @@ int TechnoClassExt::_Threat_Range(int control) const
 
     if (control == 0) {
 
-        // Travelling scans past weapon range so Approach_Target still computes a firing cell (foot.cpp:1144).
-        if (Is_Foot() && Vinifera_AttackMove_Is_Active(reinterpret_cast<const FootClass*>(this))) {
-            if (Vinifera_AttackMove_Is_Travelling(reinterpret_cast<const FootClass*>(this))) {
+        if (Vinifera_AttackMove_Any_Active() && Is_Foot()) {
+
+            const int status = Vinifera_AttackMove_Status(reinterpret_cast<const FootClass*>(this));
+
+            // Travelling scans past weapon range so Approach_Target still computes a firing cell (foot.cpp:1144).
+            if (status == ATTACKMOVE_TRAVEL) {
                 return std::max(Weapon_Range(WEAPON_SLOT_PRIMARY), Weapon_Range(WEAPON_SLOT_SECONDARY))
                     + ATTACKMOVE_LOOKAHEAD_LEPTONS;
             }
-            return 0;
+
+            if (status != -1) {
+                return 0;
+            }
         }
 
         if (TClass->ThreatRange != 0 && !Is_Renovator()) {

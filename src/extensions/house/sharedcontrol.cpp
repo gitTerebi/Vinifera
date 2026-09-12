@@ -83,6 +83,12 @@ void Vinifera_Init_Shared_Control()
 
         SharedControlHouses[id] = true;
 
+        if (!house->IsAITriggersOn) {
+            house->IsAITriggersOn = true;
+            DEBUG_INFO("SharedControl: house {} \"{}\" had no construction yard, enabling AI triggers.\n",
+                id, house->IniName.c_str());
+        }
+
         DEBUG_INFO("SharedControl: house {} \"{}\" is now commandable by the player.\n",
             id, house->IniName.c_str());
     }

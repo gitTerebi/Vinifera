@@ -24,6 +24,9 @@
 #define ATTACKMOVE_SCAN_MAX 5
 
 
+static int AttackMoveActiveCount = 0;
+
+
 bool Vinifera_AttackMove_Type_Allowed(const FootClass* foot)
 {
     if (foot == nullptr || foot->RTTI == RTTI_AIRCRAFT) {
@@ -151,6 +154,10 @@ void Vinifera_AttackMove_Assign(int sender_id, const xTargetClass& whom, const C
 
     FootClassExtension* ext = Extension::Fetch(foot);
 
+    if (!ext->IsAttackMove) {
+        AttackMoveActiveCount++;
+    }
+
     ext->IsAttackMove = true;
     ext->AttackMoveCell = cell;
     ext->AttackMoveStatus = ATTACKMOVE_TRAVEL;
@@ -167,7 +174,7 @@ void Vinifera_AttackMove_Assign(int sender_id, const xTargetClass& whom, const C
 
 void Vinifera_AttackMove_Clear(TechnoClass* techno)
 {
-    if (techno == nullptr || !techno->Is_Foot()) {
+    if (AttackMoveActiveCount == 0 || techno == nullptr || !techno->Is_Foot()) {
         return;
     }
 
@@ -181,34 +188,62 @@ void Vinifera_AttackMove_Clear(TechnoClass* techno)
     ext->AttackMoveCell = Cell(0, 0);
     ext->AttackMoveStatus = ATTACKMOVE_TRAVEL;
     ext->AttackMoveScanDelay = 0;
+
+    AttackMoveActiveCount--;
 }
 
 
-bool Vinifera_AttackMove_Is_Active(const FootClass* foot)
+void Vinifera_AttackMove_Uncount()
 {
-    if (foot == nullptr) {
-        return false;
+    if (AttackMoveActiveCount > 0) {
+        AttackMoveActiveCount--;
     }
-
-    return Extension::Fetch(const_cast<FootClass*>(foot))->IsAttackMove;
 }
 
 
-bool Vinifera_AttackMove_Is_Travelling(const FootClass* foot)
+void Vinifera_AttackMove_Recount()
 {
-    if (foot == nullptr) {
-        return false;
+    AttackMoveActiveCount = 0;
+
+    for (int i = 0; i < Technos.Count(); ++i) {
+        TechnoClass* techno = Technos[i];
+
+        if (!techno->Is_Foot()) {
+            continue;
+        }
+
+        if (Extension::Fetch(reinterpret_cast<FootClass*>(techno))->IsAttackMove) {
+            AttackMoveActiveCount++;
+        }
+    }
+}
+
+
+bool Vinifera_AttackMove_Any_Active()
+{
+    return AttackMoveActiveCount > 0;
+}
+
+
+int Vinifera_AttackMove_Status(const FootClass* foot)
+{
+    if (AttackMoveActiveCount == 0 || foot == nullptr) {
+        return -1;
     }
 
     FootClassExtension* ext = Extension::Fetch(const_cast<FootClass*>(foot));
 
-    return ext->IsAttackMove && ext->AttackMoveStatus == ATTACKMOVE_TRAVEL;
+    if (!ext->IsAttackMove) {
+        return -1;
+    }
+
+    return ext->AttackMoveStatus;
 }
 
 
 bool Vinifera_AttackMove_Destination(const FootClass* foot, Cell& cell)
 {
-    if (foot == nullptr) {
+    if (AttackMoveActiveCount == 0 || foot == nullptr) {
         return false;
     }
 
@@ -261,6 +296,10 @@ static void Resume_Travel(FootClass* foot, FootClassExtension* ext)
 
 void Vinifera_AttackMove_AI(FootClass* foot)
 {
+    if (AttackMoveActiveCount == 0) {
+        return;
+    }
+
     FootClassExtension* ext = Extension::Fetch(foot);
 
     if (!ext->IsAttackMove) {
@@ -339,6 +378,13 @@ void Vinifera_AttackMove_AI(FootClass* foot)
 
     case ATTACKMOVE_ENGAGE:
     {
+        if (ext->AttackMoveScanDelay > 0) {
+            ext->AttackMoveScanDelay--;
+            break;
+        }
+
+        ext->AttackMoveScanDelay = Random_Pick(ATTACKMOVE_SCAN_MIN, ATTACKMOVE_SCAN_MAX);
+
         if (foot->TarCom != nullptr) {
 
             TechnoClass* victim = Target_As_Techno(foot->TarCom);

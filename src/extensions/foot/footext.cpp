@@ -11,6 +11,8 @@
 
 #include "footext.h"
 
+#include "attackmove.h"
+
 
 /**
  *  Class constructor.
@@ -46,6 +48,10 @@ FootClassExtension::FootClassExtension(const NoInitClass &noinit) :
  */
 FootClassExtension::~FootClassExtension()
 {
+    if (IsAttackMove) {
+        IsAttackMove = false;
+        Vinifera_AttackMove_Uncount();
+    }
 }
 
 

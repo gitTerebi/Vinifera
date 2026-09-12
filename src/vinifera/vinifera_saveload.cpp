@@ -20,6 +20,7 @@
 #include "anim.h"
 #include "animtype.h"
 #include "armortype.h"
+#include "attackmove.h"
 #include "audio_static_sound.h"
 #include "battleui.h"
 #include "beacon.h"
@@ -966,6 +967,8 @@ void Vinifera_Post_Load_Game()
     }
 
     BeaconManager.Load_Art();
+
+    Vinifera_AttackMove_Recount();
 
     if (Session.Type != GAME_NORMAL) {
         Vinifera_Init_Shared_Control();

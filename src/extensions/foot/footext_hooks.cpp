@@ -330,9 +330,10 @@ void FootClassExt::_Draw_Action_Line() const
         UIControls->TargetLineDropShadowColor.G,
         UIControls->TargetLineDropShadowColor.B);
 
-    // OpenRA AttackMoveInfo.TargetLineColor is Color.OrangeRed.
-    const bool attack_moving = Vinifera_AttackMove_Is_Active(this);
+    Cell attack_move_cell;
+    const bool attack_moving = Vinifera_AttackMove_Destination(this, attack_move_cell);
 
+    // OpenRA AttackMoveInfo.TargetLineColor is Color.OrangeRed.
     const unsigned navcom_color = attack_moving
         ? DSurface::Build_Hicolor_Pixel(255, 69, 0)
         : DSurface::Build_Hicolor_Pixel(
@@ -360,9 +361,7 @@ void FootClassExt::_Draw_Action_Line() const
 
     }
 
-    Cell attack_move_cell;
-    const bool show_attack_move_dest = !NavCom && attack_moving
-        && Vinifera_AttackMove_Destination(this, attack_move_cell);
+    const bool show_attack_move_dest = !NavCom && attack_moving;
 
     if (NavCom || show_attack_move_dest) {
 
