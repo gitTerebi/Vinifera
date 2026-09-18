@@ -27,6 +27,7 @@ public:
     static bool Init();
     static bool Start_Game();
     static void Write_Data_To_Save_Version_Info(ViniferaSaveVersionInfo& saveversioninfo);
+    static bool Is_CoopSP() { return Enabled && Config && Config->CoopSP; }
 
 private:
     static bool Start_Scenario(char* scenario_name);
@@ -35,6 +36,7 @@ private:
     static int Spawner_Config_AI_Difficulty_To_Game_AI_Difficulty(int difficulty);
 
     static bool Init_Session(char* scenario_name);
+    static void Configure_CoopSP_As_Skirmish(CCINIClass& battle_ini);
     static void Init_Network();
 
 private:

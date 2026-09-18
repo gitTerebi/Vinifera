@@ -4,17 +4,23 @@
 
 #include "airally.h"
 #include "debughandler.h"
+#include "extension.h"
 #include "hooker.h"
 #include "house.h"
+#include "housetype.h"
 #include "session.h"
+#include "spawner.h"
 #include "syringe.h"
 #include "techno.h"
+#include "technotype.h"
+#include "technotypeext.h"
 #include "tibsun_globals.h"
 
 #include <algorithm>
 
 
 static bool SharedControlHouses[32];
+static constexpr const char* COOPSP_PLAYER_HOUSE = "Fake31";
 
 
 bool Vinifera_Is_Shared_Control_House(const HouseClass* house)
@@ -56,6 +62,56 @@ DEFINE_HOOK(0x004CB97E, _HouseClass_Is_Player_Control_Multiplayer, 5)
 }
 
 
+static void Init_CoopSP_Player_House()
+{
+    if (!Spawner::Is_CoopSP() || PlayerPtr == nullptr) {
+        return;
+    }
+
+    HousesType coop = HouseTypeClass::From_Name(COOPSP_PLAYER_HOUSE);
+    if ((coop == HOUSE_NONE || coop >= 32) && HouseTypes.Count() > 31) {
+        coop = static_cast<HousesType>(31);
+    }
+    if (coop == HOUSE_NONE || coop >= 32) {
+        DEBUG_WARNING("CoopSP: no house type \"{}\" below index 32; player keeps ActLike {}.\n",
+            COOPSP_PLAYER_HOUSE, static_cast<int>(PlayerPtr->ActLike));
+        return;
+    }
+
+    const HousesType country = PlayerPtr->Class->House;
+    if (country == coop) {
+        return;
+    }
+
+    const long src = 1L << country;
+    const long dst = 1L << coop;
+
+    for (int i = 0; i < TechnoTypes.Count(); i++) {
+        TechnoTypeClass* ttype = TechnoTypes[i];
+        if (ttype == nullptr) {
+            continue;
+        }
+
+        if (ttype->Ownable & src) {
+            ttype->Ownable |= dst;
+        }
+
+        TechnoTypeClassExtension* ext = Extension::Fetch(ttype);
+        if (ext->RequiredHouses != -1 && (ext->RequiredHouses & src)) {
+            ext->RequiredHouses |= dst;
+        }
+        if (ext->ForbiddenHouses != -1 && (ext->ForbiddenHouses & src)) {
+            ext->ForbiddenHouses |= dst;
+        }
+    }
+
+    PlayerPtr->ActLike = coop;
+
+    DEBUG_INFO("CoopSP: player house {} builds as \"{}\" (type {}) with the ownership of type {}.\n",
+        static_cast<int>(PlayerPtr->HeapID), HouseTypes[coop]->Name(), static_cast<int>(coop), static_cast<int>(country));
+}
+
+
 void Vinifera_Init_Shared_Control()
 {
     std::fill(std::begin(SharedControlHouses), std::end(SharedControlHouses), false);
@@ -64,6 +120,8 @@ void Vinifera_Init_Shared_Control()
     if (PlayerPtr == nullptr) {
         return;
     }
+
+    Init_CoopSP_Player_House();
 
     for (int i = 0; i < Houses.Count(); i++) {
         HouseClass* house = Houses[i];

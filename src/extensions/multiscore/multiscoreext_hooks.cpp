@@ -19,6 +19,7 @@
 #include "housetype.h"
 #include "multiscore.h"
 #include "scenario.h"
+#include "spawner.h"
 #include "syringe.h"
 #include "tibsun_globals.h"
 #include "vector.h"
@@ -220,6 +221,10 @@ void MultiScoreExt::_Tally_Score()
             Session.Score[score_index].Score[0]);
 
         DEBUG_INFO(" KillRatio = {}\n BuildEconomy = {}\n", kill_ratio, build_economy);
+    }
+
+    if (Spawner::Is_CoopSP() && PlayerPtr != nullptr && !PlayerPtr->IsDefeated) {
+        DEBUG_INFO("ScoreScreen: Loaded CoopSP victory\n");
     }
 }
 

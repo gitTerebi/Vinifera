@@ -78,6 +78,8 @@ public:
     int Seed = 0;
     int TechLevel = 10;
     bool IsCampaign = false;
+    bool CoopSP = false;
+    int StartingCredits = -1;
     CampaignType CampaignID = CAMPAIGN_NONE;
     DiffType CampaignDifficulty = DIFF_NORMAL;
     DiffType CampaignCDifficulty = DIFF_NORMAL;

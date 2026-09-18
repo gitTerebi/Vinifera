@@ -78,12 +78,109 @@ bool Spawner::Init()
     if (spawn_file.Is_Available()) {
         spawn_ini.Load(spawn_file, false);
         Config->Read_INI(spawn_ini);
+
+        if (Config->IsCampaign && !Config->MissionInternalName.empty()) {
+            CCFileClass battle_file("INI\\Battle.ini");
+            if (battle_file.Is_Available(false)) {
+                CCINIClass battle_ini;
+                battle_ini.Load(battle_file, false);
+                Config->CoopSP = battle_ini.Get_Bool(Config->MissionInternalName.c_str(), "CoopSP", false);
+                Config->StartingCredits = battle_ini.Get_Int(Config->MissionInternalName.c_str(), "StartingCredits", -1);
+                if (Config->CoopSP) {
+                    Configure_CoopSP_As_Skirmish(battle_ini);
+                }
+            }
+        }
+
         return true;
     }
 
     DEBUG_FATAL("SPAWN.INI not found!\n");
     return false;
 }
+
+void Spawner::Configure_CoopSP_As_Skirmish(CCINIClass& battle_ini)
+{
+    const char* mission = Config->MissionInternalName.c_str();
+
+    CCINIClass map_ini;
+    CCFileClass map_file(Config->ScenarioName.c_str());
+    if (map_file.Is_Available()) {
+        map_ini.Load(map_file, false);
+    }
+
+    Config->IsCampaign = false;
+    Config->TechLevel = battle_ini.Get_Int(mission, "TechLevel", 7);
+    Config->Credits = Config->StartingCredits >= 0 ? Config->StartingCredits : map_ini.Get_Int("Basic", "Credits", 5000);
+    Config->Bases = false;
+    Config->UnitCount = map_ini.Get_Int("Basic", "UnitCount", 0);
+    Config->BuildOffAlly = true;
+    Config->Crates = false;
+    Config->MCVRedeploy = false;
+    Config->BridgeDestroy = true;
+    Config->ScrapMetal = true;
+    Config->AttackNeutralUnits = true;
+    Config->CoachMode = true;
+    Config->ShortGame = false;
+    Config->AlliesAllowed = false;
+    Config->FogOfWar = false;
+    if (Config->MapName.empty()) {
+        Config->MapName = map_ini.Get_String("Basic", "Name", std::string(mission));
+    }
+
+    auto& human = Config->Players[0];
+    human.IsHuman = true;
+    human.SpawnLocation = 0;
+    if (human.Color < 0) human.Color = static_cast<PlayerColorType>(3);
+    Config->HumanPlayers = 1;
+    Config->LocalPlayerIndex = 0;
+
+    int count = 1;
+    auto add_ai = [&](int side, int color, int start, int difficulty, bool allied) {
+        if (count >= static_cast<int>(std::size(Config->Players))) return;
+        auto& ai = Config->Players[count];
+        ai = std::remove_reference_t<decltype(ai)>{};
+        ai.IsHuman = false;
+        ai.House = static_cast<HousesType>(side);
+        ai.Color = static_cast<PlayerColorType>(color);
+        ai.SpawnLocation = start;
+        ai.Difficulty = difficulty;
+        if (allied) {
+            ai.Alliances[0] = 0;
+            for (int& slot : human.Alliances) {
+                if (slot == -1) { slot = count; break; }
+            }
+        }
+        DEBUG_INFO("[Spawner CoopSP] slot {}: side={} color={} start={} difficulty={} allied={}\n",
+            count, side, color, start, difficulty, allied);
+        count++;
+    };
+
+    auto read_house = [&](const char* key, int& side, int& color, int& start) {
+        char buffer[64] = {};
+        map_ini.Get_String("Basic", key, "", buffer, sizeof(buffer));
+        return std::sscanf(buffer, "%d,%d,%d", &side, &color, &start) == 3;
+    };
+
+    const int commander_color = human.Color == 0 ? 2 : 0;
+    add_ai(human.House, commander_color, 1, 0, true);
+
+    char key[32];
+    int side, color, start;
+    for (int i = 0; i < 8; ++i) {
+        std::snprintf(key, sizeof(key), "AllyHouse%d", i);
+        if (read_house(key, side, color, start)) add_ai(side, color, start, 0, true);
+    }
+    for (int i = 0; i < 8; ++i) {
+        std::snprintf(key, sizeof(key), "EnemyHouse%d", i);
+        if (read_house(key, side, color, start)) add_ai(side, color, start, Config->CampaignCDifficulty, false);
+    }
+
+    Config->AIPlayers = count - 1;
+    DEBUG_INFO("[Spawner CoopSP] {} runs as skirmish: scenario={} ai={} credits={} tech={}\n",
+        mission, Config->ScenarioName.c_str(), Config->AIPlayers, Config->Credits, Config->TechLevel);
+}
+
 
 /**
  *  Starts the game.
