@@ -6,6 +6,7 @@
 #include "extension.h"
 #include "foot.h"
 #include "footext.h"
+#include "hooker_macros.h"
 #include "house.h"
 #include "infantry.h"
 #include "infantrytype.h"
@@ -25,6 +26,19 @@
 
 
 static int AttackMoveActiveCount = 0;
+
+
+/**
+ *  A fake class to call FootClass::Move_Order, which TS++ does not map.
+ *
+ *  @note: This must not contain a constructor or destructor.
+ */
+class FootClassFake : public FootClass
+{
+public:
+    Cell _Move_Order(const Cell& where, bool consider_fog);
+};
+DEFINE_IMPLEMENTATION(Cell FootClassFake::_Move_Order(const Cell&, bool), 0x004A8800);
 
 
 bool Vinifera_AttackMove_Type_Allowed(const FootClass* foot)
@@ -119,7 +133,7 @@ void Vinifera_AttackMove_Order(const Cell& cell)
         }
 
         // Resolved client side, as the engine does in code/foot.cpp:1765.
-        const Cell moveto = reinterpret_cast<FootClass*>(techno)->Move_Order(cell, false);
+        const Cell moveto = reinterpret_cast<FootClassFake*>(techno)->_Move_Order(cell, false);
 
         if (moveto == CELL_NONE) {
             continue;
